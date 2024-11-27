@@ -18,6 +18,7 @@ defmodule Livebook.Users.User do
           email: String.t() | nil,
           avatar_url: String.t() | nil,
           payload: map() | nil,
+          role: :editor | :viewer,
           hex_color: hex_color()
         }
 
@@ -29,6 +30,7 @@ defmodule Livebook.Users.User do
     field :email, :string
     field :avatar_url, :string
     field :payload, :map
+    field :role, Ecto.Enum, values: [:editor, :viewer]
     field :hex_color, Livebook.EctoTypes.HexColor
   end
 
@@ -42,13 +44,14 @@ defmodule Livebook.Users.User do
       name: nil,
       email: nil,
       avatar_url: nil,
+      role: :editor,
       hex_color: Livebook.EctoTypes.HexColor.random()
     }
   end
 
   def changeset(user, attrs \\ %{}) do
     user
-    |> cast(attrs, [:name, :email, :avatar_url, :hex_color])
+    |> cast(attrs, [:name, :email, :avatar_url, :hex_color, :role])
     |> validate_required([:hex_color])
   end
 end
