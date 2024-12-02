@@ -26,6 +26,11 @@ defmodule Livebook.ZTA.Cloudflare do
   end
 
   @impl true
+  def logout(_name, _socket) do
+    :error
+  end
+
+  @impl true
   def init(options) do
     state = struct!(__MODULE__, options)
     {:ok, renew(state)}

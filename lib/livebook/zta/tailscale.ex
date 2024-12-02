@@ -29,6 +29,11 @@ defmodule Livebook.ZTA.Tailscale do
     {conn, user}
   end
 
+  @impl true
+  def logout(_name, _socket) do
+    :error
+  end
+
   defp authenticate_ip(remote_ip, address) do
     {url, options} =
       if String.starts_with?(address, "http") do

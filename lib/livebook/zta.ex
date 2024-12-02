@@ -45,6 +45,11 @@ defmodule Livebook.ZTA do
   """
   @callback authenticate(name(), Plug.Conn.t(), keyword()) :: {Plug.Conn.t(), metadata() | nil}
 
+  @doc """
+  Logouts against the given name.
+  """
+  @callback logout(name(), Phoenix.LiveView.Socket.t()) :: :ok | :error
+
   @doc false
   def init do
     :ets.new(__MODULE__, [:named_table, :public, :set, read_concurrency: true])

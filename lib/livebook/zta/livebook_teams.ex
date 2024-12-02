@@ -35,6 +35,16 @@ defmodule Livebook.ZTA.LivebookTeams do
     end
   end
 
+  @impl true
+  def logout(name, %{assigns: %{current_user: %{payload: %{"access_token" => token}}}}) do
+    team = Livebook.ZTA.get(name)
+
+    case Teams.Requests.logout_identity_provider(team, token) do
+      {:ok, _no_content} -> :ok
+      _ -> :error
+    end
+  end
+
   defp handle_request(conn, team, %{"teams_identity" => _, "code" => code}) do
     with {:ok, access_token} <- retrieve_access_token(team, code),
          {:ok, metadata} <- get_user_info(team, access_token) do
