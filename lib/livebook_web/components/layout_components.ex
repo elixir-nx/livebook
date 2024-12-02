@@ -127,6 +127,20 @@ defmodule LivebookWeb.LayoutComponents do
             </span>
           </button>
           <button
+            :if={@current_user.email}
+            class="h-7 flex items-center text-gray-400 hover:text-white border-l-4 border-transparent hover:border-white"
+            aria-label="logout"
+            phx-click="logout"
+          >
+            <.remix_icon
+              icon="logout-box-line"
+              class="text-lg leading-6 w-[56px] flex justify-center"
+            />
+            <span class="text-sm font-medium">
+              Logout
+            </span>
+          </button>
+          <button
             class="mt-6 flex items-center group border-l-4 border-transparent"
             aria_label="user profile"
             phx-click={show_current_user_modal()}

@@ -94,7 +94,13 @@ defmodule LivebookWeb.UserPlug do
   we get possibly updated `user_data` from `connect_params`.
   """
   def build_current_user(session, user_data_override \\ nil) do
-    identity_data = Map.new(session["identity_data"], fn {k, v} -> {Atom.to_string(k), v} end)
+    identity_data =
+      if identity_data = session["identity_data"] do
+        Map.new(identity_data, fn {k, v} -> {Atom.to_string(k), v} end)
+      else
+        %{}
+      end
+
     attrs = user_data_override || session["user_data"] || %{}
 
     attrs =

@@ -169,6 +169,11 @@ defmodule LivebookWeb.Router do
     post "/", AuthController, :authenticate
   end
 
+  scope "/", LivebookWeb do
+    pipe_through [:browser]
+    get "/logout", LogoutController, :logout
+  end
+
   defp within_iframe_secure_headers(conn, _opts) do
     if Livebook.Config.within_iframe?() do
       delete_resp_header(conn, "x-frame-options")

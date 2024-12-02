@@ -244,7 +244,7 @@ defmodule Livebook.Teams.Requests do
   @spec logout_identity_provider(Team.t(), String.t()) ::
           {:ok, String.t()} | {:error, map() | String.t()} | {:transport_error, String.t()}
   def logout_identity_provider(team, access_token) do
-    delete("/api/v1/org/identity/logout", %{access_token: access_token}, team)
+    post("/api/v1/org/identity/revoke", %{access_token: access_token}, team)
   end
 
   @doc """

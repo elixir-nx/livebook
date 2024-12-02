@@ -1,0 +1,18 @@
+<div class="h-screen w-full px-4 py-8 bg-gray-900 flex justify-center items-center">
+  <div class="max-w-[400px] w-full flex flex-col">
+    <a href={~p"/"} class="mb-2 -ml-2">
+      <img src={~p"/images/logo.png"} height="96" width="96" alt="livebook" />
+    </a>
+    <div class="mb-2 text-xl text-gray-100 font-medium">
+      You have been logged out
+    </div>
+
+    <div class="mb-8 text-sm text-gray-200">
+      Thank you for using <strong>Livebook</strong>
+    </div>
+
+    <div class="text-gray-50 w-full">
+      <.button navigate={~p"/"}>Sign in back</.button>
+    </div>
+  </div>
+</div>

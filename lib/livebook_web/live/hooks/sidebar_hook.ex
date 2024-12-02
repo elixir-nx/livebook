@@ -1,4 +1,5 @@
 defmodule LivebookWeb.SidebarHook do
+  use LivebookWeb, :verified_routes
   require Logger
 
   import Phoenix.Component
@@ -17,12 +18,31 @@ defmodule LivebookWeb.SidebarHook do
       |> attach_hook(:hubs, :handle_info, &handle_info/2)
       |> attach_hook(:shutdown, :handle_info, &handle_info/2)
       |> attach_hook(:shutdown, :handle_event, &handle_event/3)
+      |> attach_hook(:logout, :handle_info, &handle_info/2)
+      |> attach_hook(:logout, :handle_event, &handle_event/3)
 
     {:cont, socket}
   end
 
   defp handle_info(:shutdown, socket) do
     {:halt, put_flash(socket, :info, "Livebook is shutting down. You can close this page.")}
+  end
+
+  defp handle_info(:logout, socket) do
+    {_type, module, _key} = Livebook.Config.identity_provider()
+
+    case module.logout(LivebookWeb.ZTA, socket) do
+      :ok ->
+        Livebook.Users.unsubscribe(socket.assigns.current_user.id)
+
+        {:halt,
+         socket
+         |> assign(current_user: nil)
+         |> redirect(to: ~p"/logout")}
+
+      :error ->
+        {:cont, socket}
+    end
   end
 
   @connection_events ~w(hub_connected hub_changed hub_deleted)a
@@ -56,6 +76,21 @@ defmodule LivebookWeb.SidebarHook do
        description: "Are you sure you want to shut down Livebook now?",
        confirm_text: "Shut Down",
        confirm_icon: "shut-down-line"
+     )}
+  end
+
+  defp handle_event("logout", _params, socket) do
+    on_confirm = fn socket ->
+      Phoenix.PubSub.broadcast(Livebook.PubSub, "sidebar", :logout)
+      put_flash(socket, :info, "Livebook is logging out. You will be redirected soon.")
+    end
+
+    {:halt,
+     confirm(socket, on_confirm,
+       title: "Log out",
+       description: "Are you sure you want to log out Livebook now?",
+       confirm_text: "Log out",
+       confirm_icon: "logout-box-line"
      )}
   end
 
