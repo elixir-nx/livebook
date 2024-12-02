@@ -239,6 +239,15 @@ defmodule Livebook.Teams.Requests do
   end
 
   @doc """
+  Send a request to Livebook Team API to get the user information from given access token.
+  """
+  @spec logout_identity_provider(Team.t(), String.t()) ::
+          {:ok, String.t()} | {:error, map() | String.t()} | {:transport_error, String.t()}
+  def logout_identity_provider(team, access_token) do
+    delete("/api/v1/org/identity/logout", %{access_token: access_token}, team)
+  end
+
+  @doc """
   Normalizes errors map into errors for the given schema.
   """
   @spec to_error_list(module(), %{String.t() => list(String.t())}) ::
