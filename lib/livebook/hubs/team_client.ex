@@ -801,16 +801,19 @@ defmodule Livebook.Hubs.TeamClient do
     state
   end
 
-  defp update_hub(state, %LivebookProto.UserConnected{org_disabled: disabled}) do
-    update_hub(state, &put_in(&1.disabled, disabled))
+  defp update_hub(state, %LivebookProto.UserConnected{statuses: statuses}) do
+    update_hub(state, &put_statuses(&1, statuses))
   end
 
-  defp update_hub(state, %LivebookProto.OrgUpdated{disabled: disabled}) do
-    update_hub(state, &put_in(&1.disabled, disabled))
+  defp update_hub(state, %LivebookProto.AgentConnected{
+         public_key: org_public_key,
+         statuses: statuses
+       }) do
+    update_hub(state, &put_statuses(put_in(&1.org_public_key, org_public_key), statuses))
   end
 
-  defp update_hub(state, %LivebookProto.AgentConnected{public_key: org_public_key}) do
-    update_hub(state, &put_in(&1.org_public_key, org_public_key))
+  defp update_hub(state, %LivebookProto.OrgUpdated{statuses: statuses}) do
+    update_hub(state, &put_statuses(&1, statuses))
   end
 
   defp update_hub(state, fun) when is_function(fun, 1) do
@@ -821,6 +824,26 @@ defmodule Livebook.Hubs.TeamClient do
     end
 
     put_in(state.hub, hub)
+  end
+
+  # if there are no statuses, it means the org is active.
+  defp put_statuses(hub, []) do
+    %{hub | trial_ends_at: nil, cancel_at: nil}
+  end
+
+  defp put_statuses(hub, statuses) do
+    Enum.reduce_while(statuses, hub, fn %LivebookProto.OrgStatus{type: type}, hub ->
+      case type do
+        {:trial, %LivebookProto.OrgStatusTrial{trial_ends_at: seconds}} ->
+          {:halt, %{hub | trial_ends_at: DateTime.from_unix!(seconds), cancel_at: nil}}
+
+        {:cancel, %LivebookProto.OrgStatusCancel{cancel_at: seconds}} ->
+          {:halt, %{hub | trial_ends_at: nil, cancel_at: DateTime.from_unix!(seconds)}}
+
+        _other ->
+          {:cont, %{hub | trial_ends_at: nil, cancel_at: nil}}
+      end
+    end)
   end
 
   defp diff(old_list, new_list, fun, deleted_fun \\ nil, updated_fun \\ nil) do

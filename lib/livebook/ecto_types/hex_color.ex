@@ -8,7 +8,6 @@ defmodule Livebook.EctoTypes.HexColor do
   def load(value), do: {:ok, value}
 
   @impl true
-
   def dump(value), do: {:ok, value}
 
   @impl true

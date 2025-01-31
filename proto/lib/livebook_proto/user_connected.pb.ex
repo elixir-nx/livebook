@@ -16,5 +16,5 @@ defmodule LivebookProto.UserConnected do
     json_name: "appDeployments"
 
   field :agents, 6, repeated: true, type: LivebookProto.Agent
-  field :org_disabled, 7, type: :bool, json_name: "orgDisabled"
+  field :statuses, 7, repeated: true, type: LivebookProto.OrgStatus
 end
