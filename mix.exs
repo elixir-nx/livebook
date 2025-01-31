@@ -256,6 +256,7 @@ defmodule Livebook.MixProject do
       "docs/teams/intro_to_teams.md",
       "docs/teams/shared_secrets.md",
       "docs/teams/shared_file_storages.md",
+      {"docs/teams/oidc_sso.md", title: "OIDC SSO"},
       "docs/authentication/basic_auth.md",
       "docs/authentication/cloudflare.md",
       "docs/authentication/google_iap.md",
