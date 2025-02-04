@@ -241,6 +241,18 @@ export function findChildOrThrow(element, selector) {
   return child;
 }
 
+export function findClosestOrThrow(element, selector) {
+  const closest = element.closest(selector);
+
+  if (!closest) {
+    throw new Error(
+      `expected closest matching ${selector}, but none was found`,
+    );
+  }
+
+  return closest;
+}
+
 export function cancelEvent(event) {
   // Cancel any default browser behavior.
   event.preventDefault();
