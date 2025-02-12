@@ -1,5 +1,5 @@
 elixir="1.18.2"
-otp="27.2.2"
+otp="27.2.1"
 openssl="1.1.1s"
 rebar3="3.22.0"
-ubuntu="noble-20250127"
+ubuntu="jammy-20240808"
