@@ -2,6 +2,7 @@ import HyperList from "hyperlist";
 import { parseHookProps } from "../lib/attribute";
 import {
   findChildOrThrow,
+  findClosestOrThrow,
   getLineHeight,
   isScrolledToEnd,
   scrollToEnd,
@@ -15,6 +16,10 @@ import {
  *
  *   * `max-height` - the maximum height of the element, exceeding
  *     this height enables scrolling
+ *
+ *   * `max-height-amplified` - the maximum height of the element
+ *      when "Amplify Output" is selected in the UI, exceeding this
+ *      height enables scrolling when selected
  *
  *   * `follow` - whether to automatically scroll to the bottom as
  *     new lines appear
@@ -40,6 +45,9 @@ const VirtualizedLines = {
     this.lineHeight = getLineHeight(this.el);
     this.templateEl = findChildOrThrow(this.el, "[data-template]");
     this.contentEl = findChildOrThrow(this.el, "[data-content]");
+    this.cellEl = findClosestOrThrow(this.el, "[data-el-cell]");
+    this.amplifyOutput = this.isAmplifyOutput();
+    this.amplifyObserver = this.newAmplifyObserver();
 
     this.capLines();
 
@@ -67,9 +75,14 @@ const VirtualizedLines = {
     }
   },
 
+  destroyed() {
+    this.amplifyObserver.disconnect();
+  },
+
   getProps() {
     return parseHookProps(this.el, [
       "max-height",
+      "max-height-amplified",
       "follow",
       "max-lines",
       "ignore-trailing-empty-line",
@@ -81,7 +94,7 @@ const VirtualizedLines = {
     const numberOfLines = lineEls.length;
 
     const height = Math.min(
-      this.props.maxHeight,
+      this.amplifyOutput ? this.props.maxHeightAmplified : this.props.maxHeight,
       this.lineHeight * numberOfLines,
     );
 
@@ -138,6 +151,25 @@ const VirtualizedLines = {
         first.innerHTML = "...";
       }
     }
+  },
+
+  newAmplifyObserver() {
+    const observer = new MutationObserver((mutationRecords) => {
+      if (
+        mutationRecords.length != 1 ||
+          mutationRecords[0].target != this.cellEl ||
+          mutationRecords[0].attributeName != "data-js-amplified"
+      ) { throw new Error("unexpected mutation changing Amplify Output"); }
+
+      this.amplifyOutput = this.isAmplifyOutput();
+      this.updated();
+    });
+    observer.observe(this.cellEl, {attributeFilter: ["data-js-amplified"]});
+    return observer;
+  },
+
+  isAmplifyOutput() {
+    return (this.cellEl.getAttribute("data-js-amplified") != null);
   },
 };
 

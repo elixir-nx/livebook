@@ -66,6 +66,7 @@ defmodule LivebookWeb.Output.TerminalTextComponent do
       class="relative group/root"
       phx-hook="VirtualizedLines"
       data-p-max-height={hook_prop(300)}
+      data-p-max-height-amplified={hook_prop(600)}
       data-p-follow={hook_prop(true)}
       data-p-max-lines={hook_prop(Livebook.Notebook.max_terminal_lines())}
       data-p-ignore-trailing-empty-line={hook_prop(true)}
