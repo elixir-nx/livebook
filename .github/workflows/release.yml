@@ -1,63 +1,66 @@
-name: Release
+name: Release test
 on:
   push:
-    tags:
-      - "v*.*.*"
-  schedule:
-    # Daily at 00:00
-    - cron: "0 0 * * *"
-  # Workflow dispatch always builds as nightly
-  workflow_dispatch:
+    branches:
+      - "jk-tmp"
+  # push:
+  #   tags:
+  #     - "v*.*.*"
+  # schedule:
+  #   # Daily at 00:00
+  #   - cron: "0 0 * * *"
+  # # Workflow dispatch always builds as nightly
+  # workflow_dispatch:
 jobs:
-  create_release:
-    if: github.repository == 'livebook-dev/livebook'
-    name: "Create release"
-    permissions:
-      contents: write
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-    steps:
-      - name: Checkout git repo
-        uses: actions/checkout@v4
-      - name: Create release
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            gh release create \
-              --repo ${{ github.repository }} \
-              --title ${{ github.ref_name }} \
-              --draft \
-              ${{ github.ref_name }}
-          else
-            ref_name="nightly"
+  # create_release:
+  #   if: github.repository == 'livebook-dev/livebook'
+  #   name: "Create release"
+  #   permissions:
+  #     contents: write
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+  #   steps:
+  #     - name: Checkout git repo
+  #       uses: actions/checkout@v4
+  #     - name: Create release
+  #       run: |
+  #         if [[ "${{ github.ref_type }}" == "tag" ]]; then
+  #           gh release create \
+  #             --repo ${{ github.repository }} \
+  #             --title ${{ github.ref_name }} \
+  #             --draft \
+  #             ${{ github.ref_name }}
+  #         else
+  #           ref_name="nightly"
 
-            if ! gh release view $ref_name; then
-              gh release create \
-                --repo ${{ github.repository }} \
-                --title $ref_name \
-                --notes "Automated nightly release." \
-                --latest=false \
-                $ref_name
-            fi
+  #           if ! gh release view $ref_name; then
+  #             gh release create \
+  #               --repo ${{ github.repository }} \
+  #               --title $ref_name \
+  #               --notes "Automated nightly release." \
+  #               --latest=false \
+  #               $ref_name
+  #           fi
 
-            git tag $ref_name --force
-            git push origin $ref_name --force
-          fi
+  #           git tag $ref_name --force
+  #           git push origin $ref_name --force
+  #         fi
 
-  desktop:
-    if: github.repository == 'livebook-dev/livebook'
-    name: "Desktop"
-    runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
-    steps:
-      - name: Trigger desktop builds
-        run: |
-          if [[ "${{ github.ref_type }}" == "tag" ]]; then
-            gh workflow run -R livebook-dev/livebook_cd build.yml -f ref=${{ github.ref_name }} -f release_name=${{ github.ref_name }}
-          else
-            gh workflow run -R livebook-dev/livebook_cd build.yml -f ref=${{ github.sha }} -f release_name=nightly
-          fi
+  # desktop:
+  #   if: github.repository == 'livebook-dev/livebook'
+  #   name: "Desktop"
+  #   runs-on: ubuntu-latest
+  #   env:
+  #     GITHUB_TOKEN: ${{ secrets.GH_RELEASE_TOKEN }}
+  #   steps:
+  #     - name: Trigger desktop builds
+  #       run: |
+  #         if [[ "${{ github.ref_type }}" == "tag" ]]; then
+  #           gh workflow run -R livebook-dev/livebook_cd build.yml -f ref=${{ github.ref_name }} -f release_name=${{ github.ref_name }}
+  #         else
+  #           gh workflow run -R livebook-dev/livebook_cd build.yml -f ref=${{ github.sha }} -f release_name=nightly
+  #         fi
 
   docker:
     if: github.repository == 'livebook-dev/livebook'
@@ -108,7 +111,8 @@ jobs:
         with:
           context: .
           platforms: linux/amd64,linux/arm64
-          push: true
+          # push: true
+          push: false
           tags: ${{ steps.meta.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
